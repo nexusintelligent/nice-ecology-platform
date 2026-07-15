@@ -111,4 +111,123 @@ function projectSummaryCard(p){const species=[...new Set(p.records.flatMap(r=>ar
 function renderCompare(){const a=KB_DATA.projects.find(p=>p.id===$('#compareA').value)||KB_DATA.projects[0],b=KB_DATA.projects.find(p=>p.id===$('#compareB').value)||KB_DATA.projects[1];$('#compareOutput').innerHTML=projectSummaryCard(a)+projectSummaryCard(b)}
 function renderContracts(){$('#contractIndex').innerHTML=KB_DATA.contracts.map(c=>{const count=KB_DATA.projects.reduce((n,p)=>n+p.records.filter(r=>r.year===c.years||c.years.includes(r.year)).length,0);return `<div class="index-card"><strong>${safe(c.years)}年度</strong><small>${safe(c.name)}<br>執行單位：${safe(c.executor)}<br>關聯紀錄：約 ${count} 筆</small></div>`}).join('')}
 document.addEventListener('DOMContentLoaded',()=>{init();initKnowledge()});
-</script></body></html>
+</script>
+
+<section
+  id="notionApiTestPanel"
+  style="
+    max-width: 1440px;
+    margin: 0 auto 24px;
+    padding: 16px 24px;
+  "
+>
+  <div
+    style="
+      background: white;
+      border: 1px solid #dce6df;
+      border-radius: 14px;
+      padding: 16px;
+    "
+  >
+    <h3 style="margin-top:0;">Notion資料連線測試</h3>
+
+    <button
+      id="notionApiTestButton"
+      type="button"
+      style="
+        border:0;
+        border-radius:10px;
+        padding:10px 14px;
+        background:#397f4b;
+        color:white;
+        cursor:pointer;
+      "
+    >
+      讀取Notion資料
+    </button>
+
+    <pre
+      id="notionApiTestResult"
+      style="
+        margin-top:14px;
+        padding:14px;
+        border-radius:10px;
+        background:#f4f8f5;
+        white-space:pre-wrap;
+        overflow:auto;
+        max-height:400px;
+      "
+    >尚未測試</pre>
+  </div>
+</section>
+
+<script>
+  const NICE_NOTION_API_URL =
+    https://script.google.com/macros/s/AKfycbyGO6SFkuTuaYIkGf0JijZYRvUTnHMqTZftVINDJ3sJvZ0mag7iK7oR_08Vh6KHxA-w/exec;
+
+  async function testNotionApiConnection() {
+    const output =
+      document.getElementById('notionApiTestResult');
+
+    const button =
+      document.getElementById('notionApiTestButton');
+
+    output.textContent = '正在讀取Notion資料……';
+    button.disabled = true;
+
+    try {
+      const url =
+        `${NICE_NOTION_API_URL}?action=projects&t=${Date.now()}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow',
+        cache: 'no-store'
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status} ${response.statusText}`
+        );
+      }
+
+      const result = await response.json();
+
+      if (!result.ok) {
+        throw new Error(
+          result.error || 'Apps Script回傳未知錯誤'
+        );
+      }
+
+      output.textContent =
+        JSON.stringify(result, null, 2);
+    } catch (error) {
+      console.error(error);
+
+      output.textContent =
+        [
+          '讀取失敗。',
+          '',
+          `錯誤訊息：${error.message}`,
+          '',
+          '請檢查：',
+          '1. Apps Script是否重新部署為新版本。',
+          '2. 網頁應用程式存取權是否為任何人。',
+          '3. 使用的是/exec網址。',
+          '4. Apps Script網址直接開啟時是否能顯示JSON。'
+        ].join('\n');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  document
+    .getElementById('notionApiTestButton')
+    .addEventListener(
+      'click',
+      testNotionApiConnection
+    );
+</script>
+
+</body>
+</html>
