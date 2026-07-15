@@ -134,6 +134,7 @@ document.addEventListener('DOMContentLoaded',()=>{init();initKnowledge()});
     <button
       id="notionApiTestButton"
       type="button"
+      onclick="testNotionApiConnection()"
       style="
         border:0;
         border-radius:10px;
@@ -163,7 +164,7 @@ document.addEventListener('DOMContentLoaded',()=>{init();initKnowledge()});
 
 <script>
   const NICE_NOTION_API_URL =
-    https://script.google.com/macros/s/AKfycbyGO6SFkuTuaYIkGf0JijZYRvUTnHMqTZftVINDJ3sJvZ0mag7iK7oR_08Vh6KHxA-w/exec;
+    'https://script.google.com/macros/s/AKfycbyGO6SFkuTuaYIkGf0JijZYRvUTnHMqTZftVINDJ3sJvZ0mag7iK7oR_08Vh6KHxA-w/exec';
 
   async function testNotionApiConnection() {
     const output =
@@ -221,7 +222,6 @@ document.addEventListener('DOMContentLoaded',()=>{init();initKnowledge()});
     }
   }
 
-onclick="testNotionApiConnection()"
 </script>
 
 </body>
