@@ -166,60 +166,110 @@ document.addEventListener('DOMContentLoaded',()=>{init();initKnowledge()});
   const NICE_NOTION_API_URL =
     'https://script.google.com/macros/s/AKfycbyGO6SFkuTuaYIkGf0JijZYRvUTnHMqTZftVINDJ3sJvZ0mag7iK7oR_08Vh6KHxA-w/exec';
 
-  async function testNotionApiConnection() {
+  function testNotionApiConnection() {
     const output =
       document.getElementById('notionApiTestResult');
 
     const button =
       document.getElementById('notionApiTestButton');
 
+    if (!output || !button) {
+      alert('找不到Notion連線測試元件。');
+      return;
+    }
+
     output.textContent = '正在讀取Notion資料……';
     button.disabled = true;
 
-    try {
-      const url =
-        `${NICE_NOTION_API_URL}?action=projects&t=${Date.now()}`;
+    const callbackName =
+      'niceNotionCallback_' + Date.now();
 
-      const response = await fetch(url, {
-        method: 'GET',
-        redirect: 'follow',
-        cache: 'no-store'
-      });
+    const script =
+      document.createElement('script');
 
-      if (!response.ok) {
-        throw new Error(
-          `HTTP ${response.status} ${response.statusText}`
-        );
+    let completed = false;
+
+    const timeoutId = setTimeout(function () {
+      if (completed) return;
+
+      cleanup();
+
+      output.textContent = [
+        '讀取失敗。',
+        '',
+        '錯誤訊息：Apps Script回應逾時。',
+        '',
+        '請檢查：',
+        '1. Apps Script是否已重新部署為新版本。',
+        '2. 網頁應用程式存取權是否設為任何人。',
+        '3. 使用的網址是否以 /exec 結尾。',
+        '4. Apps Script是否已支援 callback 參數。'
+      ].join('\n');
+    }, 15000);
+
+    function cleanup() {
+      completed = true;
+      clearTimeout(timeoutId);
+      button.disabled = false;
+
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
       }
 
-      const result = await response.json();
+      try {
+        delete window[callbackName];
+      } catch (error) {
+        window[callbackName] = undefined;
+      }
+    }
 
-      if (!result.ok) {
-        throw new Error(
-          result.error || 'Apps Script回傳未知錯誤'
-        );
+    window[callbackName] = function (result) {
+      cleanup();
+
+      if (!result || result.ok !== true) {
+        output.textContent = [
+          '讀取失敗。',
+          '',
+          '錯誤訊息：',
+          result && result.error
+            ? result.error
+            : 'Apps Script回傳格式不正確。'
+        ].join('\n');
+
+        return;
       }
 
       output.textContent =
         JSON.stringify(result, null, 2);
-    } catch (error) {
-      console.error(error);
+    };
 
-      output.textContent =
-        [
-          '讀取失敗。',
-          '',
-          `錯誤訊息：${error.message}`,
-          '',
-          '請檢查：',
-          '1. Apps Script是否重新部署為新版本。',
-          '2. 網頁應用程式存取權是否為任何人。',
-          '3. 使用的是/exec網址。',
-          '4. Apps Script網址直接開啟時是否能顯示JSON。'
-        ].join('\n');
-    } finally {
-      button.disabled = false;
-    }
+    script.onerror = function () {
+      cleanup();
+
+      output.textContent = [
+        '讀取失敗。',
+        '',
+        '錯誤訊息：無法載入Apps Script回應。',
+        '',
+        '請確認Apps Script網址、部署權限及JSONP設定。'
+      ].join('\n');
+    };
+
+    const separator =
+      NICE_NOTION_API_URL.includes('?')
+        ? '&'
+        : '?';
+
+    script.src =
+      NICE_NOTION_API_URL +
+      separator +
+      'action=projects' +
+      '&callback=' +
+      encodeURIComponent(callbackName) +
+      '&t=' +
+      Date.now();
+
+    document.body.appendChild(script);
   }
 
 </script>
