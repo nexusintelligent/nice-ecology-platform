@@ -112,7 +112,7 @@ function projectSummaryCard(p){if(!p)return '<div class="compare-card"><h3>尚�
 function renderCompare(){const a=KB_DATA.projects.find(p=>p.id===$('#compareA').value)||KB_DATA.projects[0],b=KB_DATA.projects.find(p=>p.id===$('#compareB').value)||KB_DATA.projects[1];$('#compareOutput').innerHTML=projectSummaryCard(a)+projectSummaryCard(b)}
 function renderContracts(){$('#contractIndex').innerHTML=KB_DATA.contracts.map(c=>{const count=KB_DATA.projects.reduce((n,p)=>n+p.records.filter(r=>r.year===c.years||c.years.includes(r.year)).length,0);return `<div class="index-card"><strong>${safe(c.years)}年度</strong><small>${safe(c.name)}<br>執行單位：${safe(c.executor)}<br>關聯紀錄：約 ${count} 筆</small></div>`}).join('')}
 
-const NICE_API_URL='https://script.google.com/macros/s/AKfycbzfEnH3_iGHwTzIelEr8Y6gJ3nlUKa0G5wxJaxymD-uVsqR1E-cDV9fIWCnXN_WtzRk/exec';
+const NICE_API_URL='https://script.google.com/macros/s/AKfycbzE35Nk7494NPY4CYyA0N9R-kSjLkWS3rR959bJd2sxaWKYR9olkLhb2iOMR1jtQLIC/exec';
 function normalizeNotionId(value){return String(value||'').replace(/-/g,'').toLowerCase()}
 function valueList(value){return Array.isArray(value)?value.filter(Boolean):String(value||'').split(/[、,，;；\n]+/).map(x=>x.trim()).filter(Boolean)}
 function dataStatus(message,type){const el=document.getElementById('dataStatus');if(!el)return;el.hidden=false;el.className='data-status'+(type?' '+type:'');el.textContent=message;if(type==='success')setTimeout(()=>{el.hidden=true},5000)}
