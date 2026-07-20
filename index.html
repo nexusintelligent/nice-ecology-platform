@@ -134,6 +134,14 @@ function adaptNiceData(payload){
 }
 document.addEventListener('DOMContentLoaded',async()=>{try{const payload=await loadNiceBundle();const counts=adaptNiceData(payload);init();initKnowledge();dataStatus(`已載入 ${counts.projects} 件案件、${counts.histories} 筆歷程、${counts.knowledge} 筆知識資料`,'success')}catch(error){console.error(error);init();initKnowledge();dataStatus('公開資料載入失敗：'+error.message+'。請稍後重試或確認 GAS 部署。','error')}});
 </script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DH1TEKQ3BT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'G-DH1TEKQ3BT');
+</script>
 </body>
 </html>
