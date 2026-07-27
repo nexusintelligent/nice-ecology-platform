@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NICE 生態檢核互動查詢平台</title>
+<link rel="icon" type="image/png" href="./assets/nice-icon.png">
+<link rel="apple-touch-icon" href="./assets/nice-icon.png">
 <style>
 :root{--green:#397f4b;--green2:#83aa43;--blue:#2678ad;--navy:#173f5f;--ink:#20302a;--muted:#64746d;--line:#dce6df;--bg:#f4f8f5;--card:#fff;--warn:#c97920;--danger:#b64040;--shadow:0 12px 32px rgba(26,70,48,.09)}
 *{box-sizing:border-box} body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;background:linear-gradient(180deg,#eef6f0 0,#f8fbf9 35%,#f4f7f8 100%);color:var(--ink)}
@@ -150,7 +152,7 @@ function initKnowledge(){
  $('#kbCountProjects').textContent=KB_DATA.projects.length;$('#kbCountRecords').textContent=KB_DATA.projects.reduce((n,p)=>n+p.records.length,0);$('#kbCountExecutors').textContent=ex.length;$('#kbCountSources').textContent=KB_DATA.contracts.length;
  renderKnowledgeList();renderKnowledgeDetail();renderMeasureIndex();renderSpeciesIndex();renderIssueIndex();renderCompare();renderContracts();
 }
-function kbFiltered(){const kw=$('#kbKeyword').value.trim().toLowerCase(),yr=$('#kbYear').value,st=$('#kbStage').value,di=$('#kbDistrict').value,ex=$('#kbExecutor').value,ag=$('#kbAgency').value;return KB_DATA.projects.filter(p=>(!kw||kbText(p).includes(kw))&&(!di||p.district===di)&&(!ag||p.agency===ag)&&p.records.some(r=>(!yr||r.year===yr)&&(!st||r.stage.includes(st))&&(!ex||r.executor===ex)))}
+function kbFiltered(){const kw=$('#kbKeyword').value.trim().toLowerCase(),yr=$('#kbYear').value,st=$('#kbStage').value,di=$('#kbDistrict').value,ex=$('#kbExecutor').value,ag=$('#kbAgency').value,hasHistoryFilter=!!(yr||st||ex);return KB_DATA.projects.filter(p=>(!kw||kbText(p).includes(kw))&&(!di||p.district===di)&&(!ag||p.agency===ag)&&(!hasHistoryFilter||p.records.some(r=>(!yr||r.year===yr)&&(!st||r.stage.includes(st))&&(!ex||r.executor===ex))))}
 function renderKnowledgeList(){const list=kbFiltered();$('#kbResultCount').textContent=`${list.length} 件`;if(list.length&&!list.some(p=>p.id===kbSelectedId))kbSelectedId=list[0].id;$('#kbList').innerHTML=list.map(p=>`<div class="kb-item ${p.id===kbSelectedId?'active':''}" data-kbid="${p.id}"><b>${safe(p.name)}</b><div class="meta">${safe(p.agency||'主管機關未提供')}<br>${safe(p.district||'')} · ${safe(p.water||'')}<br>${sortedRecords(p.records).map(r=>`${safe(r.year)}／${safe(r.stage)}`).join('、')}</div></div>`).join('')||'<div class="empty">查無符合資料</div>';$$('[data-kbid]').forEach(x=>x.onclick=()=>{kbSelectedId=x.dataset.kbid;renderKnowledgeList();renderKnowledgeDetail()});renderKnowledgeDetail()}
 function recordTags(r,key,cls=''){return arr(r[key]).map(x=>`<span class="pill ${cls}">${safe(x)}</span>`).join('')}
 function measureParts(value){const original=String(value||'').trim(),categories=[],prefix=/^\s*[（(\[［【]\s*(迴避|縮小|減輕|補償|其他)\s*[）)\]］】]\s*/;let text=original,match;while((match=text.match(prefix))){categories.push(match[1]);text=text.slice(match[0].length)}return {categories:[...new Set(categories)],text:text.trim()||original}}
