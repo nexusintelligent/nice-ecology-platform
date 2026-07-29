@@ -115,8 +115,10 @@ function init(){
 function applyTheme(theme){const value=theme==='dark'?'dark':'light';document.documentElement.dataset.theme=value;document.documentElement.style.colorScheme=value;const button=$('#themeToggle'),next=value==='dark'?'淺色':'深色';if(button){button.setAttribute('aria-pressed',String(value==='dark'));button.setAttribute('aria-label',`切換至${next}模式`);button.title=`切換至${next}模式`}syncAIFrameTheme(value)}
 function initTheme(){let theme='';try{theme=localStorage.getItem('niceTheme')||''}catch(e){}if(!theme)theme=window.matchMedia?.('(prefers-color-scheme: dark)').matches?'dark':'light';applyTheme(theme)}
 function toggleTheme(){const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('niceTheme',theme)}catch(e){}applyTheme(theme)}
-function syncAIFrameTheme(theme=document.documentElement.dataset.theme||'light'){const frame=$('#aiFrame');if(frame?.contentWindow)frame.contentWindow.postMessage({type:'nice-theme',theme},'*')}
-window.addEventListener('message',event=>{const frame=$('#aiFrame');if(!frame||event.source!==frame.contentWindow)return;if(event.data?.type==='nice-embed-ready'){syncAIFrameTheme();return}if(event.data?.type!=='nice-embed-height')return;const height=Math.max(640,Math.min(2200,Number(event.data.height)||0));if(height)frame.style.height=`${height}px`});
+let aiFrameMessenger=null;
+function syncAIFrameTheme(theme=document.documentElement.dataset.theme||'light'){const target=aiFrameMessenger||$('#aiFrame')?.contentWindow;if(target)target.postMessage({type:'nice-theme',theme},'*')}
+function isTrustedAIFrameOrigin(origin){return /^https:\/\/(?:script\.google\.com|[a-z0-9-]+-script\.googleusercontent\.com)$/i.test(origin)}
+window.addEventListener('message',event=>{const frame=$('#aiFrame');if(!frame||!isTrustedAIFrameOrigin(event.origin))return;if(event.data?.type==='nice-embed-ready'){aiFrameMessenger=event.source;syncAIFrameTheme();return}if(event.data?.type!=='nice-embed-height'||(aiFrameMessenger&&event.source!==aiFrameMessenger))return;const height=Math.max(640,Math.min(2200,Number(event.data.height)||0));if(height)frame.style.height=`${height}px`});
 document.addEventListener('DOMContentLoaded',()=>{const frame=$('#aiFrame');if(frame)frame.addEventListener('load',()=>syncAIFrameTheme())});
 const VALID_PAGES=new Set(['home','tools','project','habitat','inspection','knowledge','ai']);
 const VALID_KB_MODES=new Set(['projects','measures','species','issues','compare','contracts']);
